@@ -15,7 +15,8 @@ with open('data_file.csv', mode='a', newline='', encoding='utf-8') as table:
     table_writer = csv.writer(table)
 
     while Run:
-        url = "https://steamcommunity.com/app/848450/discussions/1/" + "?fp=" + str(page_num)
+        time.sleep(.1)
+        url = "https://steamcommunity.com/app/521890/discussions/" + "?fp=" + str(page_num)
 
         page = requests.get(url)
         soup = BeautifulSoup(page.text, 'html.parser')
@@ -26,7 +27,7 @@ with open('data_file.csv', mode='a', newline='', encoding='utf-8') as table:
         posters = soup.find_all(class_='forum_topic_op')
 
         if links:
-            print("Found Data")
+            print("Found Data on Page: " + str(page_num))
             discussion_count = len(links)
 
             for discussion in range(discussion_count):
@@ -49,8 +50,9 @@ with open('data_file.csv', mode='a', newline='', encoding='utf-8') as table:
             Run = False
 
 
-
+collected_threads = 0
 for index in range(len(discussion_urls)):
+    time.sleep(.1)
     title = discussion_titles[index]
     op = discussion_ops[index]
     reply_count = discussion_replies[index]
@@ -68,11 +70,15 @@ for index in range(len(discussion_urls)):
             if text_index != -1:
                 filtered_text = script_text[text_index + len("text:"):]
                 filtered_text = filtered_text[2:-15]
-                print(filtered_text.strip())
+                #print(filtered_text.strip())
+
 
     with open('data_file.csv', mode='a', newline='', encoding='utf-8') as table:
         table_writer = csv.writer(table)
         table_writer.writerow([title, op, reply_count, filtered_text, url])
     table.close()
+
+    collected_threads += 1
+    print("[" + str(collected_threads) + "/" + str(len(discussion_urls)) + "]")
 
         
