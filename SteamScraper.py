@@ -131,7 +131,7 @@ def main():
             thread_bodyText, thread_Language, thread_DateTime, thread_TranslatedBodyText = get_Thread_Data(thread_urls[row_index])
             writeToCSV(gameName, gameGenre, thread_titles[row_index], thread_TitleLanguages[row_index], thread_TranslatedTitles[row_index], thread_ops[row_index], thread_replies[row_index], thread_bodyText, thread_Language, thread_TranslatedBodyText, thread_urls[row_index], thread_DateTime, "Bug Report")
             
-            print("Row Completed: [" + row_index + "/" + str(range(len(thread_urls))) + "]")
+            print("Row Completed: [" + str(row_index) + "/" + str(range(len(thread_urls))) + "]")
 main()
 
 
