@@ -7,18 +7,18 @@ import csv
 import time
 import os
 
-gameGenre = "Horror"
-game_URLs = ["https://steamcommunity.com/app/521890/discussions/1/","https://steamcommunity.com/app/1321680/discussions/1/"]
+gameGenre = "Test"
+game_URLs = ["https://steamcommunity.com/app/2680370/discussions/"]
 
-def writeToCSV(wGameName, wGameGenre, wThreadTitle, wThreadTitleLanguage, wThreadTranslatedTitle, wThreadOp, wReplyCount, wBodyText, wThreadLanguage, wTranslatedText, wUrl, wDateTime, wThreadClass):
+def writeToCSV(wGameName, wGameGenre, wThreadTitle, wThreadTitleLanguage, wThreadTranslatedTitle, wThreadOp, wReplyCount, wBodyText, wThreadLanguage, wTranslatedText, wCombinedText, wCombinedTranslatedText, wUrl, wDateTime, wThreadClass):
     fileName = wGameGenre + "_file.csv" 
     doesExist = os.path.exists(fileName)
     with open(fileName, mode='a', newline='', encoding='utf-8') as table:
         table_writer = csv.writer(table, quotechar='"', quoting=csv.QUOTE_ALL)
         if doesExist == False:
-            table_writer.writerow(["Game Name", "Game Genre", "Thread Title", "Title Language", "Translated Title", "OP", "Reply Count", "Body Text", "Language", "Translated Text", "URL", "Date/Time Posted (PST)", "Date/Time Collected (GMT)", "Class"])
+            table_writer.writerow(["Game Name", "Game Genre", "OP", "Reply Count", "Thread Title", "Title Language", "Translated Title", "Body Text", "Language", "Translated Text", "Combined Text", "Combined Translated Text", "URL", "Date/Time Posted (PST)", "Date/Time Collected (GMT)", "Class"])
         wCurrentTime = datetime.now().strftime("%d/%m/%Y %H:%M:%S")
-        table_writer.writerow([wGameName, wGameGenre, wThreadTitle, wThreadTitleLanguage, wThreadTranslatedTitle, wThreadOp, wReplyCount, wBodyText, wThreadLanguage, wTranslatedText, wUrl, wDateTime, wCurrentTime, wThreadClass])
+        table_writer.writerow([wGameName, wGameGenre, wThreadOp, wReplyCount, wThreadTitle, wThreadTitleLanguage, wThreadTranslatedTitle, wBodyText, wThreadLanguage, wTranslatedText, wCombinedText, wCombinedTranslatedText, wUrl, wDateTime, wCurrentTime, wThreadClass])
     table.close()
     
 def format_DateTime(datetime_text):
@@ -121,17 +121,29 @@ def get_Index_Data(url):
 
     return gameName,t_Urls, t_Titles, t_TitleLanguages, t_TranslatedTitles, t_Replies, t_OPs
 
+def generateCombinedText(nativeTitle, translatedTitle, titleLanguage, nativeText, translatedText, textLanguage):
+    combinedText = nativeTitle + nativeText
+    if translatedTitle in ["-", "Translation Failed"]:
+        translatedTitle = nativeTitle
+    if translatedText in ["-", "Translation Failed"]:
+        translatedText = nativeText
+
+    if titleLanguage not in ["en", "Detection Failed"] or textLanguage not in ["en", "Detection Failed"]:
+        translatedCombinedText = translatedTitle + translatedText
+    else:
+        translatedCombinedText = "-"
+        
+    return combinedText, translatedCombinedText
+
 def main():
     for url in game_URLs:
         gameName, thread_urls, thread_titles, thread_TitleLanguages, thread_TranslatedTitles, thread_replies, thread_ops = get_Index_Data(url)
         print(len(thread_urls))
         for row_index in range(len(thread_urls)):
             time.sleep(.2)
-
             thread_bodyText, thread_Language, thread_DateTime, thread_TranslatedBodyText = get_Thread_Data(thread_urls[row_index])
-            writeToCSV(gameName, gameGenre, thread_titles[row_index], thread_TitleLanguages[row_index], thread_TranslatedTitles[row_index], thread_ops[row_index], thread_replies[row_index], thread_bodyText, thread_Language, thread_TranslatedBodyText, thread_urls[row_index], thread_DateTime, "Bug Report")
+            thread_combinedText, thread_combinedTranslatedText = generateCombinedText(thread_titles[row_index], thread_TranslatedTitles[row_index], thread_TitleLanguages[row_index], thread_bodyText, thread_TranslatedBodyText, thread_Language,)
+            writeToCSV(gameName, gameGenre, thread_titles[row_index], thread_TitleLanguages[row_index], thread_TranslatedTitles[row_index], thread_ops[row_index], thread_replies[row_index], thread_bodyText, thread_Language, thread_TranslatedBodyText, thread_combinedText, thread_combinedTranslatedText, thread_urls[row_index], thread_DateTime, "Bug Report")
             
-            print("Row Completed: [" + str(row_index) + "/" + str(range(len(thread_urls))) + "]")
+            print("Row Completed: [" + str(row_index) + "/" + str(len(thread_urls)) + "]")
 main()
-
-
